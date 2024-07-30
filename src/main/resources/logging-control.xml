@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Spring Boot 기본 콘솔 로그 출력을 그대로 유지 -->
+    <springProfile name="default">
+        <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    </springProfile>
+
+    <!-- 파일에 로그를 기록 (Rolling) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/application.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <!-- Spring Boot 기본 패턴 사용 -->
+            <!-- <pattern>${CONSOLE_LOG_PATTERN}</pattern> -->
+            <!-- Spring Boot 기본 패턴에서 색상코드를 제외하고 사용 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- LogController 에 대한 커스텀 파일 로그 기록 -->
+    <appender name="LOGCONTROLLER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/logcontroller.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 아래 파일명 패턴 설정에 따라 순서대로 월, 일, 시, 분 단위로 롤링 설정 가능 -->
+            <!-- 하지만 구체적 운영 관리 니즈에 따른 10분, 3시간, 6시간, 12시간 등 상세 커스텀 어려움 -->
+            <!-- <fileNamePattern>logs/logcontroller.%d{yyyy-MM}.log</fileNamePattern> -->
+            <!-- <fileNamePattern>logs/logcontroller.%d{yyyy-MM-dd}.log</fileNamePattern> -->
+            <!-- <fileNamePattern>logs/logcontroller.%d{yyyy-MM-dd_HH}.log</fileNamePattern> -->
+            <fileNamePattern>logs/logcontroller.%d{yyyy-MM-dd_HH-mm}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <!-- Spring Boot 기본 패턴 사용 -->
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <!-- msg 자체에 패턴을 적용하기 위한 단순 선언 -->
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Spring 기본 로거 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <!--<appender-ref ref="FILE" />-->
+    </root>
+
+    <!-- LogController 클래스에 대한 로거 -->
+    <logger level="INFO"
+            name="ac.su.kdt.loggingcontrol.controller.LogController"
+            additivity="false"> <!-- (additivity 는 상위 패키지 로그 전파 여부)-->
+        <appender-ref ref="LOGCONTROLLER" />
+        <!--<appender-ref ref="CONSOLE" />-->
+    </logger>
+
+</configuration>
