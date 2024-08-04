@@ -18,6 +18,8 @@ jobs:
           else
             echo "NO_DEPLOY=false" >> $GITHUB_ENV
           fi
+        shell: bash
+
 
       - name: Debug NO_DEPLOY value
         run: echo "NO_DEPLOY is $NO_DEPLOY"
