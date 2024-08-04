@@ -13,13 +13,16 @@ jobs:
       - name: Check for [no deploy] in commit message
         id: check_no_deploy
         run: |
-          if [[ "$(git log -1 --pretty=%B)" == *"[no deploy]"* ]]; then
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "Commit message: ${COMMIT_MESSAGE}"
+          if echo "${COMMIT_MESSAGE}" | grep -q "\[no deploy\]"; then
             echo "NO_DEPLOY=true" >> $GITHUB_ENV
+            echo "NO_DEPLOY set to true"
           else
             echo "NO_DEPLOY=false" >> $GITHUB_ENV
+            echo "NO_DEPLOY set to false"
           fi
         shell: bash
-
 
       - name: Debug NO_DEPLOY value
         run: echo "NO_DEPLOY is $NO_DEPLOY"
