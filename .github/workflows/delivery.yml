@@ -14,11 +14,13 @@ jobs:
         id: check_no_deploy
         run: |
           if [[ "$(git log -1 --pretty=%B)" == *"[no deploy]"* ]]; then
-            export NO_DEPLOY=true
+            echo "NO_DEPLOY=true" >> $GITHUB_ENV
+          else
+            echo "NO_DEPLOY=false" >> $GITHUB_ENV
           fi
 
-      - name : check NO_DEPLOY
-        run: echo "NO_DEPLOY=$NO_DEPLOY" >> $GITHUB_ENV && echo "NO_DEPLOY=$NO_DEPLOY"
+      - name: Debug NO_DEPLOY value
+        run: echo "NO_DEPLOY is $NO_DEPLOY"
 
       - name: Checkout repository
         if: env.NO_DEPLOY != 'true'
