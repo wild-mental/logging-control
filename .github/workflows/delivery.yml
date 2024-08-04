@@ -18,7 +18,7 @@ jobs:
           fi
 
       - name : check NO_DEPLOY
-        run: echo "NO_DEPLOY=$NO_DEPLOY" >> $GITHUB_ENV | echo "NO_DEPLOY=$NO_DEPLOY" | echo env.NO_DEPLOY
+        run: echo "NO_DEPLOY=$NO_DEPLOY" >> $GITHUB_ENV && echo "NO_DEPLOY=$NO_DEPLOY"
 
       - name: Checkout repository
         if: env.NO_DEPLOY != 'true'
