@@ -64,7 +64,7 @@ public class LogController {
     }
 
     @PostMapping("/cart")
-    public void addToCart(
+    public String addToCart(
         @RequestParam(name = "tr-id") String transactionId,
         @RequestBody CartForm cartForm,
         HttpServletRequest request
@@ -81,10 +81,11 @@ public class LogController {
             cartForm.getQuantity().toString(),
             request  // clientIp, userAgent, referer 정보를 얻기 위해 HttpServletRequest 객체를 파라미터로 추가
         );
+        return "장바구니 추가 로그 1행 기록됨";
     }
 
     @PostMapping("/order")
-    public void placeOrder(
+    public String placeOrder(
         @RequestParam(name = "tr-id") String transactionId,
         @RequestBody OrderForm orderForm,
         HttpServletRequest request
@@ -101,5 +102,6 @@ public class LogController {
             orderForm.getQuantity().toString(),
             request  // clientIp, userAgent, referer 정보를 얻기 위해 HttpServletRequest 객체를 파라미터로 추가
         );
+        return "주문 로그 1행 기록됨";
     }
 }
