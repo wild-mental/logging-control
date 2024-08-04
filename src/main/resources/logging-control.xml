@@ -41,7 +41,7 @@
     </appender>
 
     <!-- Spring 기본 로거 -->
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="CONSOLE" />
         <!--<appender-ref ref="FILE" />-->
     </root>
