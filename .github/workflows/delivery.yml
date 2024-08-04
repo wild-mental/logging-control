@@ -1,4 +1,4 @@
-name: Deploy to S3
+name: Delivery to S3
 
 on:
   push:
@@ -10,26 +10,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check for [no deploy] in commit message
+        id: check_no_deploy
+        run: |
+          if [[ "$(git log -1 --pretty=%B)" == *"[no deploy]"* ]]; then
+            echo "no_deploy=true" >> $GITHUB_ENV
+          fi
+
       - name: Checkout repository
+        if: env.no_deploy != 'true'
         uses: actions/checkout@v2
 
       - name: Set up JDK
+        if: env.no_deploy != 'true'
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Build with Gradle
+        if: env.no_deploy != 'true'
         run: |
           ./gradlew clean test bootJar
 
       - name: Configure AWS credentials
+        if: env.no_deploy != 'true'
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2  # 사용할 AWS 리전
 
-      - name: Deploy to S3
+      - name: Delivery to S3
+        if: env.no_deploy != 'true'
         run: |
           aws s3 cp build/custom-libs/*.jar s3://simple-deploy-builds1/
