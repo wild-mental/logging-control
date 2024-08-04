@@ -46,3 +46,15 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+def buildTime = new Date().format("YYMMdd_HHmm")
+
+bootJar {
+    // JAR 파일의 이름을 구성합니다.
+    archiveBaseName.set('logging-sample-prj')
+    archiveVersion.set("$buildTime") // 또는 version 변수를 사용할 수 있습니다.
+    archiveFileName.set("${archiveBaseName.get()}-${archiveVersion.get()}-no_db.jar")
+
+    // 빌드 결과물의 경로를 설정합니다.
+    destinationDirectory.set(file("./build/custom-libs"))
+}
