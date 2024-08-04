@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Check for [no deploy] in commit message
         id: check_no_deploy
         run: |
@@ -26,10 +29,6 @@ jobs:
 
       - name: Debug NO_DEPLOY value
         run: echo "NO_DEPLOY is $NO_DEPLOY"
-
-      - name: Checkout repository
-        if: env.NO_DEPLOY != 'true'
-        uses: actions/checkout@v2
 
       - name: Set up JDK
         if: env.NO_DEPLOY != 'true'
