@@ -1,0 +1,10 @@
+/var/logs/spring/logging-control.log {
+    daily
+    rotate 30
+    compress
+    missingok
+    notifempty
+    copytruncate
+    dateext
+    dateformat -%Y-%m-%d-%H%M%S
+}

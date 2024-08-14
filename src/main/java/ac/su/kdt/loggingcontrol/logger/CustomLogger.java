@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 
@@ -39,5 +40,10 @@ public class CustomLogger {
             request.getHeader("User-Agent"),
             request.getHeader("Referer")
         ));
+    }
+
+    // @Scheduled(cron = "*/10 * * * * *")
+    public static void scheduledLogRotate() {
+        // 로그 파일을 커스텀 로직으로 회전하는 작업을 수행하는 메서드
     }
 }

@@ -1,0 +1,38 @@
+- name: Deploy to EC2
+  run: |
+    # Define variables
+    INSTANCE_IDS=("i-1234567890abcdef0" "i-0987654321abcdef0")  # EC2 인스턴스 ID 목록
+    KEY_PATH="path/to/your/key.pem"  # SSH 키 경로
+    S3_BUCKET_NAME="your-s3-bucket-name"  # S3 버킷 이름
+    JAR_FILE_NAME="your-application.jar"  # 배포할 JAR 파일 이름
+    USER_HOME="/home/ubuntu"  # 사용자 홈 디렉토리
+    PRJ_PATH="/path/to/your/project"  # 프로젝트 경로
+    YOUR_ACC_GROUP_NAME="your_group_name"  # 계정 그룹 이름
+    
+    # Function to deploy on each EC2 instance
+    deploy_on_ec2() {
+      INSTANCE_ID=$1
+      PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[*].Instances[*].PublicIpAddress" --output text)
+    
+      # Install JDK on EC2 instance if not already installed
+      ssh -o StrictHostKeyChecking=no -i $KEY_PATH ubuntu@$PUBLIC_IP "if ! java -version 2>&1 | grep -q '17'; then sudo apt update && sudo apt install -y openjdk-17-jdk; else echo 'JDK 17 is already installed.'; fi"
+    
+      # Copy the JAR file from S3 to EC2 instance
+      ssh -o StrictHostKeyChecking=no -i $KEY_PATH ubuntu@$PUBLIC_IP "aws s3 cp s3://$S3_BUCKET_NAME/$JAR_FILE_NAME $USER_HOME/"
+    
+      # Create necessary directories
+      ssh -o StrictHostKeyChecking=no -i $KEY_PATH ubuntu@$PUBLIC_IP "sudo mkdir -p /var/logs/spring && sudo mkdir -p $USER_HOME/logrotate_conf && sudo cp $PRJ_PATH/src/main/resources/log_control_scripts/rotate-logging-control-log $USER_HOME/logrotate_conf && touch $USER_HOME/logrotate_conf/status"
+    
+      # Set ownership and permissions
+      ssh -o StrictHostKeyChecking=no -i $KEY_PATH ubuntu@$PUBLIC_IP "sudo chown -R root:$YOUR_ACC_GROUP_NAME $USER_HOME/logrotate_conf/ && sudo find $USER_HOME/logrotate_conf/ -type d -exec chmod 775 {} \; && sudo find $USER_HOME/logrotate_conf/ -type f -exec chmod 664 {} \;"
+    
+      ssh -o StrictHostKeyChecking=no -i $KEY_PATH ubuntu@$PUBLIC_IP "sudo chown -R root:$YOUR_ACC_GROUP_NAME /var/logs/spring && sudo find /var/logs/spring -type d -exec chmod 775 {} \; && sudo find /var/logs/spring -type f -exec chmod 664 {} \;"
+    
+      # Run the application
+      ssh -o StrictHostKeyChecking=no -i $KEY_PATH ubuntu@$PUBLIC_IP "nohup java -jar $USER_HOME/$JAR_FILE_NAME > /var/logs/spring/app.log 2>&1 &"
+    }
+    
+    # Deploy on each instance
+    for INSTANCE_ID in "${INSTANCE_IDS[@]}"; do
+      deploy_on_ec2 $INSTANCE_ID
+    done

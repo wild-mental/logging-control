@@ -1,0 +1,56 @@
+name: Delivery to S3
+
+on:
+  push:
+    branches:
+      - release/**  # release/ 경로 아래의 브랜치에 푸시 또는 병합될 때 실행
+
+jobs:
+  build-and-delivery:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check for [no deploy] in commit message
+        id: check_no_deploy
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --format='%B (%H)')
+          echo "Last Commit Message: ${COMMIT_MESSAGE}"
+          if echo "${COMMIT_MESSAGE}" | grep -q "\[no deploy\]"; then
+            echo "NO_DEPLOY=true" >> $GITHUB_ENV
+            echo "NO_DEPLOY set to true"
+          else
+            echo "NO_DEPLOY=false" >> $GITHUB_ENV
+            echo "NO_DEPLOY set to false"
+          fi
+        shell: bash
+
+      - name: Debug NO_DEPLOY value
+        run: echo "NO_DEPLOY is $NO_DEPLOY"
+
+      - name: Set up JDK
+        if: env.NO_DEPLOY != 'true'
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Gradle
+        if: env.NO_DEPLOY != 'true'
+        run: |
+          ./gradlew clean test bootJar
+
+      - name: Configure AWS credentials
+        if: env.NO_DEPLOY != 'true'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2  # 사용할 AWS 리전
+
+      - name: Delivery to S3
+        if: env.NO_DEPLOY != 'true'
+        run: |
+          aws s3 cp build/custom-libs/*.jar s3://simple-deploy-builds1/
