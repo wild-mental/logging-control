@@ -42,4 +42,12 @@
         <!--<appender-ref ref="CONSOLE" />-->
     </logger>
 
+    <!-- LogController 클래스에 대한 로거 -->
+    <logger level="INFO"
+            name="ac.su.kdt.loggingcontrol.controller.AdminJobController"
+            additivity="false"> <!-- (additivity 는 상위 패키지 로그 전파 여부)-->
+        <appender-ref ref="LOGCONTROLLER" />
+        <!--<appender-ref ref="CONSOLE" />-->
+    </logger>
+
 </configuration>
